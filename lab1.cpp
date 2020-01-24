@@ -40,7 +40,7 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-const int MAX_PARTICLES = 2;
+const int MAX_PARTICLES =2000;
 const float GRAVITY     = 0.1;
 
 //some structures
@@ -221,8 +221,8 @@ void makeParticle(int x, int y)
 	p->s.center.x = x;
 	p->s.center.y = y;
 	//p->velocity.y = -4.0;
-	p->velocity.y = ((float)rand() / (float)RAND_MAX) + 2.5;
-	p->velocity.x = ((float)rand() / (float)RAND_MAX) + 2.5;
+	p->velocity.y = ((float)rand() / (float)RAND_MAX) + 0.5;
+	p->velocity.x = ((float)rand() / (float)RAND_MAX) + 0.5;
 	//p->velocity.x =  1.0;
 	++g.n;
 }
@@ -246,8 +246,10 @@ void check_mouse(XEvent *e)
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
 			//Left button was pressed.
-			int y = g.yres - e->xbutton.y;
-			makeParticle(e->xbutton.x, y);
+                        int y = g.yres - e->xbutton.y;
+			for(int i = 0; i < 20; i++) {
+			    makeParticle(e->xbutton.x, y);
+			}
 			return;
 		}
 		if (e->xbutton.button==3) {
@@ -261,7 +263,10 @@ void check_mouse(XEvent *e)
 			savex = e->xbutton.x;
 			savey = e->xbutton.y;
 			//Code placed here will execute whenever the mouse moves.
-
+			int y = g.yres - e->xbutton.y;
+			for(int i = 0; i < 20; i++) {
+                            makeParticle(e->xbutton.x, y);
+                        }
 
 		}
 	}
@@ -294,24 +299,29 @@ void movement()
 		return;
 	for(int i = 0; i < g.n; i++) {
 	    Particle *p = &g.particle[i];
-	    p->velocity.y = p->velocity.y - GRAVITY;
+	    p->velocity.y -= GRAVITY;
 	    p->s.center.x += p->velocity.x;
 	    p->s.center.y += p->velocity.y;
 
-	//check for collision with shapes...
-	Shape *s = &g.box;
-	if (p->s.center.y < (s->center.y + s->height))
-	    p->velocity.y = -p->velocity.y;
+	    //check for collision with shapes...
+	    Shape *s = &g.box;
+	    if (p->s.center.y < (s->center.y + s->height) && 
+		p->s.center.x > (s->center.x - s->width) &&
+		p->s.center.x < (s->center.x + s->width) &&
+		p->s.center.y > (s->center.y - s->height)) {
+		   p->velocity.y = -p->velocity.y;
+		   p->velocity.y = 0.5;
+	    }
 
 
 
 
-	//check for off-screen
-	if (p->s.center.y < 0.0) {
+	    //check for off-screen
+	    if (p->s.center.y < 0.0) {
 		//cout << "off screen" << endl;
 		g.particle[i] = g.particle[g.n-1];	
 		--g.n;
-	}
+	    }
 	}
 }
 
