@@ -39,6 +39,7 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h" //Added header for fonts
 
 const int MAX_PARTICLES =2000;
 const float GRAVITY     = 0.1;
@@ -112,6 +113,7 @@ int main()
 		render();
 		x11.swapBuffers();
 	}
+	cleanup_fonts(); //Added 2/2/2020
 	return 0;
 }
 
@@ -207,6 +209,9 @@ void init_opengl(void)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	//Allow fonts, added 2/2/2020
+	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
 }
 
 void makeParticle(int x, int y)
@@ -345,7 +350,12 @@ void render()
 		glVertex2i( w, -h);
 	glEnd();
 	glPopMatrix();
-	//
+	//Draw the text, added 2/2/2020 120 + 5*65  500 - 5*60
+	Rect r;
+	r.bot = 495 - 5*60;
+	r.left = 80 + 5*65;
+	r.center = 0;
+	ggprint8b(&r, 16, 0x00ff0000, "REQUIREMENTS");
 	//Draw particles here
 	for (int i = 0; i < g.n; i++) {
 		//There is at least one particle to draw.
